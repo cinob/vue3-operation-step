@@ -1,0 +1,34 @@
+{
+  "name": "vue3-operation-guide",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@7.12.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.0.4",
+    "@vueuse/core": "^9.4.0",
+    "vue": "^3.2.41"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.29.2",
+    "@types/node": "^18.11.8",
+    "@unocss/reset": "^0.46.2",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "eslint": "^8.26.0",
+    "stylus": "^0.59.0",
+    "typescript": "^4.8.4",
+    "unocss": "^0.46.2",
+    "unplugin-auto-import": "^0.11.4",
+    "unplugin-vue-components": "^0.22.9",
+    "vite": "^3.2.0"
+  },
+  "eslintConfig": {
+    "extends": "@antfu"
+  }
+}
