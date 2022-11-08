@@ -17,7 +17,6 @@ export default defineConfig({
     AutoImport({
       imports: [
         'vue',
-        '@vueuse/core',
       ],
       dts: true,
     }),
@@ -27,8 +26,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'lib/main.ts'),
-      name: 'vue3-operation-guide',
-      fileName: 'vue3-operation-guide',
+      name: 'vue3-operation-step',
+      fileName: 'vue3-operation-step',
     },
     rollupOptions: {
       external: ['vue'],
