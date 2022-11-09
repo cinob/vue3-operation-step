@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import OperationStep from '@/OperationStep.vue'
 
 const first = ref<HTMLElement>()
@@ -16,7 +17,7 @@ const stepList = ref([{
 }, {
   el: third,
   content: '这是第三个',
-  style: 'border-radius:10%',
+  class: 'rounded-10%',
 }])
 </script>
 
@@ -41,6 +42,12 @@ const stepList = ref([{
     <div ref="third" class="mt-580px circle-200px border-2px border-sky-300 p-5px">
       third
     </div>
-    <OperationStep ref="step" :step-list="stepList" />
+    <OperationStep ref="step" :step-list="stepList">
+      <template #action-prefix>
+        <button @click="step.pause()">
+          暂停
+        </button>
+      </template>
+    </OperationStep>
   </div>
 </template>

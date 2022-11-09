@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { computed, nextTick, ref, watchEffect } from 'vue'
 import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 
 const props = defineProps<{
   stepList: {
     el: HTMLElement | string | undefined
     content: string
-    style?: string
+    class?: string
   }[]
+  tooltipClass?: string
   prevBtnText?: string
   nextBtnText?: string
   btnClass?: string
@@ -16,6 +18,14 @@ const props = defineProps<{
 const currentStepIndex = ref(0)
 const currentStep = computed(() => {
   return props.stepList ? props.stepList[currentStepIndex.value] : null
+})
+const currentEl = computed(() => {
+  if (currentStep.value?.el) {
+    return (typeof currentStep.value.el === 'string'
+      ? document.querySelector(currentStep.value!.el)
+      : currentStep.value!.el) as HTMLElement
+  }
+  return null
 })
 
 const content = ref<HTMLElement>()
@@ -27,7 +37,8 @@ const isShowTip = ref(true)
 
 function start() {
   currentStepIndex.value = 0
-  isShowStep.value = true
+  if (currentEl.value)
+    isShowStep.value = true
 }
 
 function skip() {
@@ -39,7 +50,8 @@ function pause() {
 }
 
 function resume() {
-  isShowStep.value = true
+  if (currentEl.value)
+    isShowStep.value = true
 }
 
 watchEffect(() => {
@@ -65,9 +77,10 @@ async function update(isChangeStep = false) {
   if (!content.value || !tooltip.value)
     return
 
-  const el = (typeof currentStep.value!.el === 'string'
-    ? document.querySelector(currentStep.value!.el)
-    : currentStep.value!.el) as HTMLElement
+  const el = currentEl.value
+
+  if (!el)
+    return false
 
   {
     const rect = el.getBoundingClientRect()
@@ -94,7 +107,7 @@ async function update(isChangeStep = false) {
     {
       placement: 'top-start',
       middleware: [
-        offset(6),
+        offset(10),
         flip(),
         shift(),
         arrow({ element: arrowRef.value!, padding: 15 }),
@@ -152,6 +165,7 @@ defineExpose({
   resume,
   prev,
   next,
+  index: currentStepIndex,
 })
 </script>
 
@@ -161,10 +175,15 @@ defineExpose({
       <div
         ref="content"
         class="content"
-        :style="currentStep?.style"
+        :class="currentStep?.class"
       />
       <Transition>
-        <div v-show="isShowTip" ref="tooltip" class="tooltip">
+        <div
+          v-show="isShowTip"
+          ref="tooltip"
+          class="tooltip"
+          :class="tooltipClass"
+        >
           <div>
             <slot :current="currentStep">
               {{ currentStep?.content }}
@@ -175,18 +194,20 @@ defineExpose({
             :current="currentStep"
           >
             <div class="action-wrapper">
+              <slot name="action-prefix" />
               <button
-                :class="`action-button ${btnClass || ''} ${isDisabledPrev ? `action-button-disabled ${disabledBtnClass || ''}` : ''}`"
+                :class="`${btnClass || ''} ${isDisabledPrev ? `action-button-disabled ${disabledBtnClass || ''}` : ''}`"
                 @click="prev()"
               >
                 {{ prevBtnText || '上一步' }}
               </button>
               <button
-                :class="`action-button ${btnClass || ''} ${isDisabledPrev ? `action-button-disabled ${disabledBtnClass || ''}` : ''}`"
+                :class="`${btnClass || ''} ${isDisabledNext ? `action-button-disabled ${disabledBtnClass || ''}` : ''}`"
                 @click="next()"
               >
                 {{ nextBtnText || '下一步' }}
               </button>
+              <slot name="action-suffix" />
             </div>
           </slot>
           <div ref="arrowRef" class="arrow" />
@@ -207,10 +228,10 @@ defineExpose({
   --at-apply: fixed z-9999 inset-0 ;
 }
 .content {
-  --at-apply: absolute top-0 left-0 outline-9999px transition-all outline-solid outline-#000/75;
+  --at-apply: absolute top-0 left-0 outline-9999px transition-all scale-105 outline-solid outline-#000/75;
 }
 .tooltip {
-  --at-apply: bg-white text-#222 font-bold p-10px rounded-4px
+  --at-apply: bg-white text-#222 p-10px rounded-4px
   absolute top-0 left-0 z-1
   w-max text-90%;
 }
@@ -219,10 +240,7 @@ defineExpose({
   transform: rotate(45deg);
 }
 .action-wrapper {
-  --at-apply: flex justify-between space-x-10px mt-10px;
-}
-.action-button {
-  --at-apply: flex justify-between text-14px;
+  --at-apply: flex space-x-10px mt-10px text-14px;
 }
 
 .action-button-disabled {
