@@ -41,12 +41,6 @@ const stepList = ref([{
     <div ref="third" class="mt-580px circle-200px border-2px border-sky-300 p-5px">
       third
     </div>
-    <OperationStep ref="step" :step-list="stepList">
-      <template #action3>
-        <button @click="step.pause()">
-          暂停
-        </button>
-      </template>
-    </OperationStep>
+    <OperationStep ref="step" :step-list="stepList" />
   </div>
 </template>

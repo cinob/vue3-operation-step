@@ -9,6 +9,8 @@ const props = defineProps<{
   }[]
   prevBtnText?: string
   nextBtnText?: string
+  btnClass?: string
+  disabledBtnClass?: string
 }>()
 
 const currentStepIndex = ref(0)
@@ -121,14 +123,26 @@ async function update(isChangeStep = false) {
   })
 }
 
+const isDisabledPrev = computed(() => {
+  return currentStepIndex.value <= 0
+})
+
+const isDisabledNext = computed(() => {
+  return currentStepIndex.value >= props.stepList.length - 1
+})
+
 function prev() {
-  currentStepIndex.value = Math.max(currentStepIndex.value - 1, 0)
-  update(true)
+  if (!isDisabledPrev.value) {
+    currentStepIndex.value = currentStepIndex.value - 1
+    update(true)
+  }
 }
 
 function next() {
-  currentStepIndex.value = Math.min(currentStepIndex.value + 1, props.stepList.length - 1)
-  update(true)
+  if (!isDisabledNext.value) {
+    currentStepIndex.value = currentStepIndex.value + 1
+    update(true)
+  }
 }
 
 defineExpose({
@@ -152,18 +166,29 @@ defineExpose({
       <Transition>
         <div v-show="isShowTip" ref="tooltip" class="tooltip">
           <div>
-            {{ currentStep?.content }}
+            <slot :current="currentStep">
+              {{ currentStep?.content }}
+            </slot>
           </div>
-          <div class="action-wrapper">
-            <slot :name="`action${currentStepIndex + 1}`" :current="currentStep">
-              <button class="action-button" @click="prev()">
-                {{ prevBtnText || '上一个' }}
+          <slot
+            name="action"
+            :current="currentStep"
+          >
+            <div class="action-wrapper">
+              <button
+                :class="`action-button ${btnClass || ''} ${isDisabledPrev ? `action-button-disabled ${disabledBtnClass || ''}` : ''}`"
+                @click="prev()"
+              >
+                {{ prevBtnText || '上一步' }}
               </button>
-              <button class="action-button" @click="next()">
-                {{ nextBtnText || '下一个' }}
+              <button
+                :class="`action-button ${btnClass || ''} ${isDisabledPrev ? `action-button-disabled ${disabledBtnClass || ''}` : ''}`"
+                @click="next()"
+              >
+                {{ nextBtnText || '下一步' }}
               </button>
-              </slot>
-          </div>
+            </div>
+          </slot>
           <div ref="arrowRef" class="arrow" />
         </div>
       </Transition>
@@ -198,6 +223,10 @@ defineExpose({
 }
 .action-button {
   --at-apply: flex justify-between text-14px;
+}
+
+.action-button-disabled {
+  --at-apply: cursor-not-allowed;
 }
 
 .v-enter-active,

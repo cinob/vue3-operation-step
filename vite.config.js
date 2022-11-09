@@ -23,8 +23,8 @@ export default defineConfig({
     }),
 
     Unocss(),
-    
-    dts({ insertTypesEntry: true, copyDtsFiles: false })
+
+    dts({ insertTypesEntry: true, copyDtsFiles: false }),
   ],
   build: {
     lib: {
