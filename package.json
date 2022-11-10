@@ -27,7 +27,8 @@
   "types": "./dist/vue3-operation-step.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode preview",
+    "build:lib": "vite build ",
     "preview": "vite preview",
     "lint:fix": "eslint . --fix"
   },
