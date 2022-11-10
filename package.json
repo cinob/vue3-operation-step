@@ -1,7 +1,23 @@
 {
   "name": "vue3-operation-step",
+  "author": {
+    "name": "cinob",
+    "email": "cinob@foxmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cinob/vue3-operation-step.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "vue",
+    "vue3",
+    "component",
+    "guide",
+    "operation"
+  ],
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "packageManager": "pnpm@7.12.0",
   "files": [
     "dist"

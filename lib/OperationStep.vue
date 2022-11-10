@@ -1,19 +1,37 @@
 <script setup lang="ts">
+import type { PropType } from 'vue'
 import { computed, nextTick, ref, watchEffect } from 'vue'
+import type { Placement } from '@floating-ui/dom'
 import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 
-const props = defineProps<{
+const props = defineProps({
   stepList: {
-    el: HTMLElement | string | undefined
-    content: string
-    class?: string
-  }[]
-  tooltipClass?: string
-  prevBtnText?: string
-  nextBtnText?: string
-  btnClass?: string
-  disabledBtnClass?: string
-}>()
+    required: true,
+    type: Array as PropType<{
+      el: HTMLElement | string | undefined
+      content: string
+      class?: string
+      beforePrev?: Function
+      afterPrev?: Function
+      beforeNext?: Function
+      afterNext?: Function
+    }[]>,
+  },
+  contentPadding: {
+    type: Number,
+    default: 5,
+  },
+  placement: {
+    type: String as PropType<Placement>,
+    default: 'top-start',
+  },
+  contentClass: String,
+  tooltipClass: String,
+  prevBtnText: String,
+  nextBtnText: String,
+  btnClass: String,
+  disabledBtnClass: String,
+})
 
 const currentStepIndex = ref(0)
 const currentStep = computed(() => {
@@ -87,10 +105,10 @@ async function update(isChangeStep = false) {
     const { width, height, x, y } = rect
 
     Object.assign(content.value!.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-      width: `${width}px`,
-      height: `${height}px`,
+      left: `${x - props.contentPadding}px`,
+      top: `${y - props.contentPadding}px`,
+      width: `${width + 2 * props.contentPadding}px`,
+      height: `${height + 2 * props.contentPadding}px`,
     })
   }
 
@@ -105,9 +123,9 @@ async function update(isChangeStep = false) {
     content.value!,
     tooltip.value!,
     {
-      placement: 'top-start',
+      placement: props.placement,
       middleware: [
-        offset(10),
+        offset(5 + props.contentPadding),
         flip(),
         shift(),
         arrow({ element: arrowRef.value!, padding: 15 }),
@@ -144,18 +162,32 @@ const isDisabledNext = computed(() => {
   return currentStepIndex.value >= props.stepList.length - 1
 })
 
-function prev() {
+async function prev() {
+  if (currentStep.value?.beforePrev) {
+    const res = await currentStep.value?.beforePrev()
+    if (!res)
+      return false
+  }
   if (!isDisabledPrev.value) {
     currentStepIndex.value = currentStepIndex.value - 1
     update(true)
   }
+  if (currentStep.value?.afterPrev)
+    await currentStep.value?.afterPrev()
 }
 
-function next() {
+async function next() {
+  if (currentStep.value?.beforeNext) {
+    const res = await currentStep.value?.beforeNext()
+    if (!res)
+      return false
+  }
   if (!isDisabledNext.value) {
     currentStepIndex.value = currentStepIndex.value + 1
     update(true)
   }
+  if (currentStep.value?.afterNext)
+    await currentStep.value?.afterNext()
 }
 
 defineExpose({
@@ -174,15 +206,13 @@ defineExpose({
     <div v-if="isShowStep" class="guide-wrapper">
       <div
         ref="content"
-        class="content"
-        :class="currentStep?.class"
+        :class="`content ${contentClass} ${currentStep?.class}`"
       />
       <Transition>
         <div
           v-show="isShowTip"
           ref="tooltip"
-          class="tooltip"
-          :class="tooltipClass"
+          :class="`tooltip ${tooltipClass}`"
         >
           <div>
             <slot :current="currentStep">
@@ -228,7 +258,7 @@ defineExpose({
   --at-apply: fixed z-9999 inset-0 ;
 }
 .content {
-  --at-apply: absolute top-0 left-0 outline-9999px transition-all scale-105 outline-solid outline-#000/75;
+  --at-apply: absolute top-0 left-0 outline-9999px transition-all outline-solid outline-#000/75;
 }
 .tooltip {
   --at-apply: bg-white text-#222 p-10px rounded-4px
