@@ -37,14 +37,15 @@ const currentStepIndex = ref(0)
 const currentStep = computed(() => {
   return props.stepList ? props.stepList[currentStepIndex.value] : null
 })
-const currentEl = computed(() => {
-  if (currentStep.value?.el) {
-    return (typeof currentStep.value.el === 'string'
-      ? document.querySelector(currentStep.value!.el)
-      : currentStep.value!.el) as HTMLElement
-  }
-  return null
-})
+const currentEl = ref<HTMLElement | null>()
+
+function updateCurrentEl() {
+  currentEl.value = currentStep.value?.el
+    ? (typeof currentStep.value.el === 'string'
+        ? document.querySelector(currentStep.value!.el)
+        : currentStep.value!.el) as HTMLElement
+    : null
+}
 
 const content = ref<HTMLElement>()
 const tooltip = ref<HTMLElement>()
@@ -55,6 +56,7 @@ const isShowTip = ref(true)
 
 function start() {
   currentStepIndex.value = 0
+  updateCurrentEl()
   if (currentEl.value)
     isShowStep.value = true
 }
@@ -68,6 +70,7 @@ function pause() {
 }
 
 function resume() {
+  updateCurrentEl()
   if (currentEl.value)
     isShowStep.value = true
 }
@@ -163,6 +166,7 @@ const isDisabledNext = computed(() => {
 })
 
 async function prev() {
+  updateCurrentEl()
   if (currentStep.value?.beforePrev) {
     const res = await currentStep.value?.beforePrev()
     if (!res)
@@ -177,6 +181,7 @@ async function prev() {
 }
 
 async function next() {
+  updateCurrentEl()
   if (currentStep.value?.beforeNext) {
     const res = await currentStep.value?.beforeNext()
     if (!res)
