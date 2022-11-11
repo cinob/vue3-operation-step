@@ -30,12 +30,17 @@ const props = defineProps({
     type: String as PropType<Placement>,
     default: 'top-start',
   },
+  autoScrollIntoView: {
+    default: true,
+  },
   contentClass: String,
   tooltipClass: String,
   prevBtnText: String,
   nextBtnText: String,
   btnClass: String,
   disabledBtnClass: String,
+  beforeChange: Function,
+  afterChange: Function,
 })
 
 const currentStepIndex = ref(0)
@@ -59,7 +64,15 @@ const arrowRef = ref<HTMLElement>()
 const isShowStep = ref(false)
 const isShowTip = ref(true)
 
-function start() {
+async function callWithHook(fn: Function) {
+  if (props.beforeChange)
+    await props.beforeChange()
+  fn()
+  if (props.afterChange)
+    await props.afterChange()
+}
+
+async function start() {
   currentStepIndex.value = 0
   updateCurrentEl()
   if (currentEl.value)
@@ -85,7 +98,7 @@ watchEffect(() => {
   if (isShowStep.value) {
     document.body.className += ' operation-step-lock'
     nextTick(() => {
-      update(true)
+      callWithHook(() => update(true))
       cleanup = autoUpdate(content.value!, tooltip.value!, update)
     })
   }
@@ -121,7 +134,9 @@ async function update(isChangeStep = false) {
   }
 
   if (isChangeStep === true) {
-    el.scrollIntoView(false)
+    if (props.autoScrollIntoView)
+      el.scrollIntoView(false)
+
     isShowTip.value = false
     await sleep(150)
     isShowTip.value = true
@@ -177,9 +192,11 @@ async function prev() {
       return false
   }
   if (!isDisabledPrev.value) {
-    currentStepIndex.value = currentStepIndex.value - 1
-    updateCurrentEl()
-    update(true)
+    callWithHook(() => {
+      currentStepIndex.value = currentStepIndex.value - 1
+      updateCurrentEl()
+      update(true)
+    })
   }
   if (currentStep.value?.afterPrev)
     await currentStep.value?.afterPrev()
@@ -192,9 +209,11 @@ async function next() {
       return false
   }
   if (!isDisabledNext.value) {
-    currentStepIndex.value = currentStepIndex.value + 1
-    updateCurrentEl()
-    update(true)
+    callWithHook(() => {
+      currentStepIndex.value = currentStepIndex.value + 1
+      updateCurrentEl()
+      update(true)
+    })
   }
   if (currentStep.value?.afterNext)
     await currentStep.value?.afterNext()
