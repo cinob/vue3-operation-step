@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { PropType } from 'vue'
-import { computed, nextTick, ref, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, ref, watchEffect } from 'vue'
 import type { Placement } from '@floating-ui/dom'
 import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 export default defineComponent({
