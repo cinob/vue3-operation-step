@@ -284,7 +284,7 @@ defineExpose({
 
 <style scoped>
 .guide-wrapper {
-  --at-apply: fixed z-9999 top-0 left-0 right-0 bottom-0;
+  --at-apply: fixed z-9999 inset-0 top-0 left-0 right-0 bottom-0;
 }
 .content {
   --at-apply: absolute top-0 left-0 outline-9999px transition-all outline-solid outline-#000/75;
