@@ -1,9 +1,14 @@
-<script setup lang="ts">
+<script lang="ts">
 import type { PropType } from 'vue'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 import type { Placement } from '@floating-ui/dom'
 import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
+export default defineComponent({
+  name: 'OperationStep',
+})
+</script>
 
+<script setup lang="ts">
 const props = defineProps({
   stepList: {
     required: true,
@@ -166,7 +171,6 @@ const isDisabledNext = computed(() => {
 })
 
 async function prev() {
-  updateCurrentEl()
   if (currentStep.value?.beforePrev) {
     const res = await currentStep.value?.beforePrev()
     if (!res)
@@ -174,6 +178,7 @@ async function prev() {
   }
   if (!isDisabledPrev.value) {
     currentStepIndex.value = currentStepIndex.value - 1
+    updateCurrentEl()
     update(true)
   }
   if (currentStep.value?.afterPrev)
@@ -181,7 +186,6 @@ async function prev() {
 }
 
 async function next() {
-  updateCurrentEl()
   if (currentStep.value?.beforeNext) {
     const res = await currentStep.value?.beforeNext()
     if (!res)
@@ -189,6 +193,7 @@ async function next() {
   }
   if (!isDisabledNext.value) {
     currentStepIndex.value = currentStepIndex.value + 1
+    updateCurrentEl()
     update(true)
   }
   if (currentStep.value?.afterNext)
